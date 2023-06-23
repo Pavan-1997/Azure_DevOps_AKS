@@ -1,0 +1,110 @@
+1. Goto Portal Azure -> Select Kubernetes services -> Create a Kubernetes cluster
+
+Now select already created Resource group 
+
+Give Kubernetes cluster name
+
+
+2. Now create a new Agent Pool
+
+Go to Project Settings
+
+Pipelines -> Agent pools -> New -> Self-hosted - > Give a pool name -> Check the Grant access permission to all pipelines
+
+
+3. Have a Agent setup, say a EC2 Intance - Ubuntu
+
+sudo apt-get update -y
+
+sudo apt-get upgrade -y 
+
+sudo apt-get install maven -y
+
+Now go to the pool created
+
+New agent -> Click on Linux -> Copy the agent
+
+In the terminal download the agent package
+
+mkdir myagent 
+
+cd myagent
+
+wget https://vstsagentpackage.azureedge.net/agent/3.220.5/vsts-agent-linux-x64-3.220.5.tar.gz
+
+tar -xvf vsts-agent-linux-x64-3.220.5.tar.gz
+
+./config.sh
+
+Type Y
+
+Now for server URL - https://dev.azure.com/sqlonlinux
+
+Click enter for PAT
+
+Now go to User settings -> Select Personal Access Tokens -> Click on New Token
+
+Now enter the earlier created pool name
+
+Now to start the agent -> ./run.sh
+
+
+4. Before Executing the pipeline in the agent prior install docker
+
+sudo apt-get install docker.io
+
+sudo usermod -aG docker $USER
+
+sudo reboot
+
+Make sure the SG are open
+
+
+5. Goto Azure DevOps portal
+
+Import the repo
+
+Now go to Pipelines and create on using a classic editior
+
+Select Maven -> In options add -DskipTests=true
+
+Add task docker buildAndPush
+
+Now in buildAndPush -> Container register click on manager -> Create New service connection -> select Dockder Registry -> Select Azure Container Registry -> Now select the Subscription -> Select the created Azure container registry -> Give name for Service connection -> Check Grant access permission to all pipelines and click on save
+
+
+Now comeback to buildAndPush -> Select the created Container Registry -> Give name to Container repository as pavanrajdevops.azurecr.io/pavan1997 -> Choose path to the Docker file -> In tags feild give as latest -> Unselect the Add pipleine  metadata to image(s) and Add base image metadata to image(s) -> Save and queue and run the pipleine
+
+
+6. Now check the docker image in the Container register you should see the image
+
+Edit the deployments.yml file in the repo ny the docker image name of the Azure registry
+
+  
+7. Now goto Pipelines -> Releases -> New pipeline -> Search for Deploy to a Kubernetes cluster and Apply , give a stage name -> Click on Add an artifact -> Select Azure Repository -> Select the Project -> Select the Source(Repository) -> Default branch - main and click on Add
+
+Now goto the starting stage -> Select kubectl -> Now goto Kubernetes service connection and click on Manage -> Search for Kubernetes -> Select the already created Cluster name -> Give Namespace - default -> Check Use cluster admin credentials -> Give a Service conenction name -> Check Grant access permission to all pipelines
+
+Now go back to the starting stage -> Select kubectl -> Now goto Kubernetes service connection select the newly created -> Namespace - default -> Command - apply -> Check Use Configuration files -> Now select the path for manifest file and click on save
+
+Now click on Create release -> Click on Create
+
+Make sure you give the agent pool name in Agent job Tasks in the starting stage -> Click on save -> Click on Deploy
+
+Now you will get error below
+
+error: error validating "/home/ubuntu/myagent/_work/r1/a/_Shopping-Cart.git/deploymentservice.yml": error validating data: the server could not find the requested resource; if you choose to ignore these errors, turn validation off with --validate=false
+The process '/home/ubuntu/myagent/_work/_temp/kubectlTask/1687495549478/kubectl' failed with exit code 1
+
+To resolved this issue goto Pipeline and Tasks and delete the kubectl task -> Add kubectl -> Give the service connection and namespace -> Command - apply and File path of manifest
+
+Now clone the above task -> Give name to it for svc -> Now only chnage Command - get svc and click on Save
+
+Will get error below
+
+No hosted parallelism has been purchased or granted. To request a free parallelism grant, please fill out the following form......
+
+Now go to the deployment file and change the ACR to DockerHub and save it 
+
+
+8. To access the application -> Need to change the manifest file type to LoadBalancer

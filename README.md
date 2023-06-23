@@ -1,24 +1,167 @@
-# Azure DevOps deploying application on AKS Cluster
+# Spring Boot Shopping Cart Web App
 
-In this project I have setup a Azure pipeline where the source code is fetched from my GitHub, Pipeline was setup having tasks for Maven, Push Artifact, Push Image to ACR 
+## About
 
-I have created a release pipeline to deploy my application on Azure AKS cluster using the manifest file present in my repo.
+This is a demo project for practicing Spring + Thymeleaf. The idea was to build some basic shopping cart web app.
 
-The pipeline is executed on agent where I have made use of a EC2 Ubuntu machine to run the jobs.
+It was made using **Spring Boot**, **Spring Security**, **Thymeleaf**, **Spring Data JPA**, **Spring Data REST and Docker**. 
+Database is in memory **H2**.
 
-At the end the application is accessed by the Load Balancer IP created by Kubernetes on Azure.
+There is a login and registration functionality included.
 
-All the commands are documented in the CMD.txt file
+Users can shop for products. Each user has his own shopping cart (session functionality).
+Checkout is transactional.
 
-Below is the image of my release pipeline:
+## Configuration
 
-![release](https://github.com/Pavan-1997/Azure_DevOps_AKS/assets/32020205/daa3d0b8-49e7-45f5-a984-a0d6af17fc22)
+### Configuration Files
 
+Folder **src/resources/** contains config files for **shopping-cart** Spring Boot application.
 
-Below are the images of my shopping cart application:
+* **src/resources/application.properties** - main configuration file. Here it is possible to change admin username/password,
+as well as change the port number.
 
-![app-2](https://github.com/Pavan-1997/Azure_DevOps_AKS/assets/32020205/ff12069e-6724-45b9-a09a-453e37a3ad19)
+## How to run
 
-![app-1](https://github.com/Pavan-1997/Azure_DevOps_AKS/assets/32020205/bd403ee8-9149-40ec-8fa3-d10690564fcf)
+There are several ways to run the application. You can run it from the command line with included Maven Wrapper, Maven or Docker. 
 
-![app](https://github.com/Pavan-1997/Azure_DevOps_AKS/assets/32020205/8945803f-858e-4d11-987c-69f2a562f850)
+Once the app starts, go to the web browser and visit `http://localhost:8070/home`
+
+Admin username: **admin**
+
+Admin password: **admin**
+
+User username: **user**
+
+User password: **password**
+
+### Maven Wrapper
+
+#### Using the Maven Plugin
+
+Go to the root folder of the application and type:
+```bash
+$ chmod +x scripts/mvnw
+$ scripts/mvnw spring-boot:run
+```
+
+#### Using Executable Jar
+
+Or you can build the JAR file with 
+```bash
+$ scripts/mvnw clean package
+``` 
+
+Then you can run the JAR file:
+```bash
+$ java -jar target/shopping-cart-0.0.1-SNAPSHOT.jar
+```
+
+### Maven
+
+Open a terminal and run the following commands to ensure that you have valid versions of Java and Maven installed:
+
+```bash
+$ java -version
+java version "1.8.0_102"
+Java(TM) SE Runtime Environment (build 1.8.0_102-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.102-b14, mixed mode)
+```
+
+```bash
+$ mvn -v
+Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T16:41:47+00:00)
+Maven home: /usr/local/Cellar/maven/3.3.9/libexec
+Java version: 1.8.0_102, vendor: Oracle Corporation
+```
+
+#### Using the Maven Plugin
+
+The Spring Boot Maven plugin includes a run goal that can be used to quickly compile and run your application. 
+Applications run in an exploded form, as they do in your IDE. 
+The following example shows a typical Maven command to run a Spring Boot application:
+ 
+```bash
+$ mvn spring-boot:run
+``` 
+
+#### Using Executable Jar
+
+To create an executable jar run:
+
+```bash
+$ mvn clean package
+``` 
+
+To run that application, use the java -jar command, as follows:
+
+```bash
+$ java -jar target/shopping-cart-0.0.1-SNAPSHOT.jar
+```
+
+To exit the application, press **ctrl-c**.
+
+### Docker
+
+It is possible to run **shopping-cart** using Docker:
+
+Build Docker image:
+```bash
+$ mvn clean package
+$ docker build -t shopping-cart:dev -f docker/Dockerfile .
+```
+
+Run Docker container:
+```bash
+$ docker run --rm -i -p 8070:8070 \
+      --name shopping-cart \
+      shopping-cart:dev
+```
+
+##### Helper script
+
+It is possible to run all of the above with helper script:
+
+```bash
+$ chmod +x scripts/run_docker.sh
+$ scripts/run_docker.sh
+```
+
+## Docker 
+
+Folder **docker** contains:
+
+* **docker/shopping-cart/Dockerfile** - Docker build file for executing shopping-cart Docker image. 
+Instructions to build artifacts, copy build artifacts to docker image and then run app on proper port with proper configuration file.
+
+## Util Scripts
+
+* **scripts/run_docker.sh.sh** - util script for running shopping-cart Docker container using **docker/Dockerfile**
+
+## Tests
+
+Tests can be run by executing following command from the root of the project:
+
+```bash
+$ mvn test
+```
+
+## Helper Tools
+
+### HAL REST Browser
+
+Go to the web browser and visit `http://localhost:8070/`
+
+You will need to be authenticated to be able to see this page.
+
+### H2 Database web interface
+
+Go to the web browser and visit `http://localhost:8070/h2-console`
+
+In field **JDBC URL** put 
+```
+jdbc:h2:mem:shopping_cart_db
+```
+
+In `/src/main/resources/application.properties` file it is possible to change both
+web interface url path, as well as the datasource url.
