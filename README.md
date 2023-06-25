@@ -8,7 +8,7 @@ The pipeline is executed on an agent where I have made use of an EC2 Ubuntu mach
 
 Service connections are created when required during the project.
 
-At the end, the application is accessed using the Load Balancer IP which is created by Kubernetes on Azure
+In the end, the application is accessed using the Load Balancer IP which is created by Kubernetes on Azure
 
 All the commands are documented in the CMD.txt file
 
