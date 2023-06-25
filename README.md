@@ -1,6 +1,6 @@
 # Azure DevOps deploying application on AKS
 
-In this project I have set up an Azure pipeline where the source code is fetched from Azure Repos and have multiple tasks where the final task was to Push Image to ACR.
+In this project, I have set up an Azure pipeline where the source code is fetched from Azure Repos and have multiple tasks where the final task was to Push Image to ACR.
 
 I have created a release pipeline where the shopping cart application is deployed on the AKS cluster using the manifest file in my repo.
 
